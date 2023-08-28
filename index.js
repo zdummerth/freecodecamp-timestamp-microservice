@@ -23,19 +23,10 @@ app.get("/api/hello", function (req, res) {
   res.json({ greeting: "hello API" });
 });
 
-app.get("/api", (req, res) => {
-  let date = new Date();
-  let UTC = date.getTime() + 20000;
-  UTC = new Date(UTC);
-  UTS = UTC.toUTCString();
-  let UNIX = date.getTime() + 20000;
-  res.json({ unix: UNIX, utc: UTS });
-});
-
 app.get("/api/:date?", function (req, res) {
   let date = req.params.date;
   console.log("date: ", date);
-  if (!date) {
+  if (req.params.date === "" || req.params.date === undefined) {
     date = new Date();
   } else {
     if (!isNaN(date)) {
