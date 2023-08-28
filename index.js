@@ -28,7 +28,7 @@ app.get("/api", (req, res) => {
   let UTC = date.getTime() + 20000;
   UTC = new Date(UTC);
   UTS = UTC.toUTCString();
-  let UNIX = date.getTime();
+  let UNIX = date.getTime() + 20000;
   res.json({ unix: UNIX, utc: UTS });
 });
 
