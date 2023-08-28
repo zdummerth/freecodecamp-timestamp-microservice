@@ -25,11 +25,11 @@ app.get("/api/hello", function (req, res) {
 
 app.get("/api", (req, res) => {
   let date = new Date();
-
-  return res.json({
-    unix: date.getTime(),
-    utc: date.toUTCString(),
-  });
+  let UTC = date.getTime();
+  UTC = new Date(UTC);
+  UTS = UTC.toUTCString();
+  let UNIX = date.getTime();
+  res.json({ unix: UNIX, utc: UTS });
 });
 
 app.get("/api/:date?", function (req, res) {
