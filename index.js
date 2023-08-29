@@ -4,8 +4,9 @@
 // init project
 var express = require("express");
 var app = express();
+var dns = require("dns");
+const urlParser = require("url");
 require("dotenv").config();
-const validUrl = require("valid-url");
 var bodyParser = require("body-parser");
 
 const shortId = require("shortid");
@@ -53,35 +54,38 @@ app.post("/api/shorturl", async function (req, res) {
   const url = req.body.url;
   const short_url = shortId.generate();
   console.log("url: ", url);
-  console.log("short_url: ", short_url);
-  if (!validUrl.isUri(url)) {
-    res.json({ error: "invalid url" });
-  } else {
-    try {
-      let findOne = await URL.findOne({
-        original_url: url,
-      });
-      if (findOne) {
-        res.json({
-          original_url: findOne.original_url,
-          short_url: findOne.short_url,
-        });
-      } else {
-        findOne = new URL({
+  const hostname = urlParser.parse(url).hostname;
+  var isValid = dns.lookup(hostname, async (err, address, family) => {
+    if (err || !address) {
+      console.log("err: ", err);
+      res.json({ error: "invalid url" });
+    } else {
+      try {
+        let findOne = await URL.findOne({
           original_url: url,
-          short_url: short_url,
         });
-        await findOne.save();
-        res.json({
-          original_url: findOne.original_url,
-          short_url: findOne.short_url,
-        });
+        if (findOne) {
+          res.json({
+            original_url: findOne.original_url,
+            short_url: findOne.short_url,
+          });
+        } else {
+          findOne = new URL({
+            original_url: url,
+            short_url: short_url,
+          });
+          await findOne.save();
+          res.json({
+            original_url: findOne.original_url,
+            short_url: findOne.short_url,
+          });
+        }
+      } catch (err) {
+        console.error(err);
+        res.status(500).json("Server error...");
       }
-    } catch (err) {
-      console.error(err);
-      res.status(500).json("Server error...");
     }
-  }
+  });
 });
 
 app.get("/api/shorturl/:short_url?", async function (req, res) {
